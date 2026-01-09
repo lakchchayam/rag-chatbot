@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+pypdf
+chromadb
+sentence-transformers
+huggingface_hub
+python-dotenv
+requests

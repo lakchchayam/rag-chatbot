@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RAG Chatbot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Libre+Baskerville:wght@400;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css">
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <!-- Note: FontAwesome kit might need replacement or CDN if kit is invalid. using CDN for reliability -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Sidebar for Uploads -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="fa-solid fa-robot"></i> DocuChat AI
+            </div>
+
+            <div class="upload-section">
+                <h3>Knowledge Base</h3>
+                <div class="file-upload-wrapper">
+                    <input type="file" id="pdf-upload" accept=".pdf" hidden>
+                    <label for="pdf-upload" class="upload-btn">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> Upload PDF
+                    </label>
+                    <div id="upload-status" class="status-msg"></div>
+                </div>
+                <!-- Developer Credit -->
+                <div class="developer-credit">
+                    developed by lakshyam
+                </div>
+            </div>
+
+            <div class="info-section">
+                <p><small>Powered by Mistral-7B & ChromaDB</small></p>
+            </div>
+        </aside>
+
+        <!-- Main Chat Area -->
+        <main class="chat-interface">
+            <div class="chat-header">
+                <h2>Assistant</h2>
+                <span class="status-badge online">Online</span>
+            </div>
+
+            <div id="chat-history" class="chat-history">
+                <!-- Messages will appear here -->
+                <div class="message system">
+                    <div class="bubble">
+                        Hello! Upload a PDF document to the left to get started, then ask me anything about it.
+                    </div>
+                </div>
+            </div>
+
+            <div class="chat-input-area">
+                <form id="chat-form">
+                    <input type="text" id="user-input" placeholder="Ask a question about your documents..."
+                        autocomplete="off">
+                    <button type="submit" id="send-btn">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+
+</html>

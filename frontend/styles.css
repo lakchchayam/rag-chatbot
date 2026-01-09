@@ -1,0 +1,344 @@
+:root {
+    /* Claude-like Matte Palette */
+    --bg-color: #FAF8F6;
+    /* Warm paper-like off-white */
+    --sidebar-bg: #F2EFE9;
+    /* Slightly darker warm beige */
+    --text-primary: #333333;
+    /* Soft matte black */
+    --text-secondary: #666666;
+    --accent-color: #DA7756;
+    /* Terracotta/Muted Orange for distinct matte look (Claude 2 style) or use soft brown */
+    /* Let's go with a sophisticated matte Charcoal/Black for buttons to keep it minimal like Claude 3 */
+    --button-bg: #2D2D2D;
+    --button-hover: #000000;
+
+    --user-msg-bg: #EAE5DD;
+    /* Warm matte beige */
+    --user-msg-text: #2D2D2D;
+    --bot-msg-bg: transparent;
+    --bot-msg-text: #2D2D2D;
+
+    --border-color: #E0E0E0;
+    --font-serif: 'Libre Baskerville', serif;
+    --font-sans: 'Inter', sans-serif;
+}
+
+body,
+html {
+    margin: 0;
+    padding: 0;
+    font-family: var(--font-sans);
+    height: 100vh;
+    background-color: var(--bg-color);
+    color: var(--text-primary);
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+}
+
+.container {
+    display: flex;
+    height: 100%;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 260px;
+    background-color: var(--sidebar-bg);
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-direction: column;
+    padding: 24px;
+}
+
+.logo {
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 48px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #1a1a1a;
+}
+
+.upload-section h3 {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #888;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.upload-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 14px;
+    background-color: #ffffff;
+    border: 1px solid #dcdcdc;
+    border-radius: 8px;
+    /* Slightly softer corners */
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.95rem;
+    color: #444;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+}
+
+.upload-btn:hover {
+    background-color: #ffffff;
+    border-color: #bbb;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.04);
+}
+
+.developer-credit {
+    margin-top: 15px;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: center;
+    font-family: var(--font-serif);
+    font-style: italic;
+    opacity: 0.8;
+}
+
+.status-msg {
+    margin-top: 12px;
+    font-size: 0.8rem;
+    color: #666;
+    text-align: center;
+}
+
+.info-section {
+    margin-top: auto;
+    color: #999;
+    text-align: center;
+    font-size: 0.8rem;
+}
+
+/* Chat Interface */
+.chat-interface {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--bg-color);
+    position: relative;
+}
+
+.chat-header {
+    padding: 20px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Removed border for cleaner look */
+}
+
+.chat-header h2 {
+    margin: 0;
+    font-family: var(--font-serif);
+    font-size: 1.5rem;
+    color: #1a1a1a;
+    font-weight: normal;
+}
+
+.status-badge {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    border-radius: 20px;
+    background-color: #E3E3E3;
+    color: #555;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.chat-history {
+    flex: 1;
+    padding: 40px 100px;
+    /* Wider padding for reading feel */
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+    /* More breathing room */
+}
+
+.message {
+    display: flex;
+    flex-direction: column;
+    max-width: 75%;
+    line-height: 1.7;
+    /* Better readability */
+}
+
+.message.user {
+    align-self: flex-end;
+    align-items: flex-end;
+}
+
+.message.bot,
+.message.system {
+    align-self: flex-start;
+    align-items: flex-start;
+}
+
+.bubble {
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-size: 1rem;
+    position: relative;
+}
+
+/* Claude style: User often has a distinct background, AI is plain text or very subtle */
+.message.user .bubble {
+    background-color: var(--user-msg-bg);
+    color: var(--user-msg-text);
+    border-radius: 12px;
+    /* Uniform radius */
+    font-family: var(--font-sans);
+}
+
+.message.bot .bubble,
+.message.system .bubble {
+    background-color: transparent;
+    /* No bubble bg for bot, just text */
+    color: var(--bot-msg-text);
+    padding: 0;
+    /* Removing padding to align with text flow */
+    font-family: var(--font-serif);
+    /* Serif for AI responses feels smarter */
+    font-size: 1.05rem;
+}
+
+.sources {
+    margin-top: 10px;
+    font-size: 0.75rem;
+    color: #888;
+    background: #fdfdfd;
+    padding: 8px 12px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    display: inline-block;
+}
+
+.chat-input-area {
+    padding: 30px 100px;
+    background-color: transparent;
+    /* Fade out effect at bottom? No, keep it clean. */
+}
+
+#chat-form {
+    display: flex;
+    gap: 15px;
+    background: #ffffff;
+    padding: 10px;
+    border: 1px solid #e0e0e0;
+    border-radius: 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    /* Soft shadow */
+    align-items: center;
+}
+
+#chat-form:focus-within {
+    border-color: #ccc;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.05);
+}
+
+#user-input {
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    font-size: 1rem;
+    outline: none;
+    font-family: var(--font-sans);
+    background: transparent;
+}
+
+#send-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: none;
+    background-color: var(--button-bg);
+    color: #f5f5f5;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#send-btn:hover {
+    background-color: var(--button-hover);
+    transform: scale(1.05);
+}
+
+#send-btn:disabled {
+    background-color: #e0e0e0;
+    color: #aaa;
+    cursor: default;
+    transform: none;
+}
+
+/* Markdown refinements within bubble */
+.bubble p {
+    margin-top: 0;
+}
+
+.bubble code {
+    background: #f1f1f1;
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: monospace;
+    font-size: 0.9em;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        height: auto;
+        padding: 15px;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .logo {
+        margin-bottom: 0;
+        font-size: 1.2rem;
+    }
+
+    .upload-section {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .upload-section h3,
+    .developer-credit,
+    .info-section {
+        display: none;
+    }
+
+    /* Hide extras on mobile for space */
+    .chat-history {
+        padding: 20px;
+    }
+
+    .chat-input-area {
+        padding: 20px;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+}
