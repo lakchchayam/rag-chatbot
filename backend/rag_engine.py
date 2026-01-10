@@ -20,8 +20,8 @@ class RAGEngine:
         if not self.hf_token:
             raise ValueError("HF_TOKEN environment variable is not set. Please set it in your .env file or environment.")
 
-        # Use HuggingFace API for embeddings (Saves RAM)
-        self.embedding_fn = embedding_functions.HuggingFaceEmbeddingFunction(
+        # Use Custom HuggingFace API for embeddings (Saves RAM) to enforce new URL
+        self.embedding_fn = CustomHuggingFaceEmbeddingFunction(
             api_key=self.hf_token,
             model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
@@ -42,7 +42,8 @@ class RAGEngine:
 
     def _validate_api_connection(self):
         """Test the embedding API to ensure the token is valid and model is ready."""
-        api_url = f"https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
+        # UPDATED: Use router.huggingface.co instead of deprecated api-inference
+        api_url = f"https://router.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
         headers = {"Authorization": f"Bearer {self.hf_token}"}
         try:
             response = requests.post(api_url, headers=headers, json={"inputs": "Hello world", "options": {"wait_for_model": True}})
@@ -59,6 +60,22 @@ class RAGEngine:
             if isinstance(e, ValueError):
                 raise e
             raise ValueError(f"Connection to Hugging Face API failed: {str(e)}")
+
+class CustomHuggingFaceEmbeddingFunction(embedding_functions.EmbeddingFunction):
+    def __init__(self, api_key: str, model_name: str):
+        self.api_url = f"https://router.huggingface.co/models/{model_name}"
+        self.headers = {"Authorization": f"Bearer {api_key}"}
+        self.session = requests.Session()
+
+    def __call__(self, input: chromadb.Documents) -> chromadb.Embeddings:
+        response = self.session.post(
+            self.api_url,
+            headers=self.headers,
+            json={"inputs": input, "options": {"wait_for_model": True}}
+        )
+        if response.status_code != 200:
+             raise ValueError(f"Embedding API Error: {response.text}")
+        return response.json()
 
     def process_pdf(self, file_path: str, filename: str):
         # 1. Extract Text
