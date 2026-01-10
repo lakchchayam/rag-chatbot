@@ -30,14 +30,19 @@ pdfUpload.addEventListener('change', async (e) => {
             body: formData
         });
 
-        if (!response.ok) throw new Error('Upload failed');
-
         const data = await response.json();
-        uploadStatus.textContent = `✓ Ready! (${data.chunks} chunks)`;
-        uploadStatus.style.color = "#166534";
+
+        if (response.ok) {
+            uploadStatus.textContent = `✓ Ready! (${data.chunks} chunks)`;
+            uploadStatus.style.color = "#166534";
+        } else {
+            uploadStatus.textContent = `Error: ${data.detail || "Upload failed."}`;
+            uploadStatus.style.color = "red";
+            console.error("Server Error:", data);
+        }
     } catch (error) {
-        console.error(error);
-        uploadStatus.textContent = "Upload failed. Try again.";
+        console.error("Network Error:", error);
+        uploadStatus.textContent = "Error: Could not connect to server.";
         uploadStatus.style.color = "red";
     }
 });
