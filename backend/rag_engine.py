@@ -1,5 +1,6 @@
 import os
 import shutil
+import requests
 from typing import List
 from pypdf import PdfReader
 import chromadb
@@ -35,6 +36,29 @@ class RAGEngine:
             model="HuggingFaceH4/zephyr-7b-beta",
             token=self.hf_token
         )
+
+        # Validate Connection immediately
+        self._validate_api_connection()
+
+    def _validate_api_connection(self):
+        """Test the embedding API to ensure the token is valid and model is ready."""
+        api_url = f"https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
+        headers = {"Authorization": f"Bearer {self.hf_token}"}
+        try:
+            response = requests.post(api_url, headers=headers, json={"inputs": "Hello world", "options": {"wait_for_model": True}})
+            if response.status_code != 200:
+                raise ValueError(f"Hugging Face API Verification Failed: {response.text}")
+            
+            # Additional check: ensure response is a list (vector) not an error dict
+            data = response.json()
+            if isinstance(data, dict) and "error" in data:
+                 raise ValueError(f"Hugging Face API Error: {data['error']}")
+                 
+        except Exception as e:
+            # Re-raise ValueErrors as is, wrap others
+            if isinstance(e, ValueError):
+                raise e
+            raise ValueError(f"Connection to Hugging Face API failed: {str(e)}")
 
     def process_pdf(self, file_path: str, filename: str):
         # 1. Extract Text
