@@ -34,28 +34,35 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 async def read_index():
     return FileResponse(os.path.join(frontend_path, "index.html"))
 
+# Global RAG Engine instance
+rag_engine = None
+init_error = "Server just started, check logs."
+
 @app.on_event("startup")
 async def startup_event():
-    global rag_engine
+    global rag_engine, init_error
     from rag_engine import RAGEngine
     # Ensure database directory exists
     os.makedirs("./chroma_db", exist_ok=True)
     try:
         rag_engine = RAGEngine()
+        init_error = None # Clear error on success
         print("RAG Engine initialized successfully.")
     except ValueError as e:
+        init_error = str(e)
         print(f"Server Startup Error: {e}")
         # We don't raise here to allow the server to start, 
         # but the chat/upload endpoints will fail gracefully if accessed.
         # Alternatively, you could 'raise e' to crash on startup.
         pass
     except Exception as e:
+        init_error = f"Unexpected Error: {str(e)}"
         print(f"Unexpected RAG Engine Error: {e}")
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
     if not rag_engine:
-        raise HTTPException(status_code=500, detail="RAG Engine not initialized. Server startup failed.")
+        raise HTTPException(status_code=500, detail=f"RAG Engine not initialized. {init_error}")
 
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
@@ -79,7 +86,7 @@ async def upload_document(file: UploadFile = File(...)):
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     if not rag_engine:
-         raise HTTPException(status_code=500, detail="RAG Engine not initialized")
+         raise HTTPException(status_code=500, detail=f"RAG Engine not initialized. {init_error}")
          
     answer, sources = rag_engine.query(request.message)
     
