@@ -13,9 +13,10 @@ class RAGEngine:
         # Initialize ChromaDB
         self.chroma_client = chromadb.PersistentClient(path=vector_db_path)
         
-        # Use sentence-transformers for embeddings
-        self.embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(
-            model_name="all-MiniLM-L6-v2"
+        # Use HuggingFace API for embeddings (Saves RAM)
+        self.embedding_fn = embedding_functions.HuggingFaceEmbeddingFunction(
+            api_key=os.getenv("HF_TOKEN"),
+            model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
         
         self.collection = self.chroma_client.get_or_create_collection(
