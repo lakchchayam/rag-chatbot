@@ -40,10 +40,23 @@ async def startup_event():
     from rag_engine import RAGEngine
     # Ensure database directory exists
     os.makedirs("./chroma_db", exist_ok=True)
-    rag_engine = RAGEngine()
+    try:
+        rag_engine = RAGEngine()
+        print("RAG Engine initialized successfully.")
+    except ValueError as e:
+        print(f"Server Startup Error: {e}")
+        # We don't raise here to allow the server to start, 
+        # but the chat/upload endpoints will fail gracefully if accessed.
+        # Alternatively, you could 'raise e' to crash on startup.
+        pass
+    except Exception as e:
+        print(f"Unexpected RAG Engine Error: {e}")
 
 @app.post("/upload")
 async def upload_document(file: UploadFile = File(...)):
+    if not rag_engine:
+        raise HTTPException(status_code=500, detail="RAG Engine not initialized. Server startup failed.")
+
     if not file.filename.endswith(".pdf"):
         raise HTTPException(status_code=400, detail="Only PDF files are allowed")
     

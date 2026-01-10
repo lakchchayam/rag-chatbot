@@ -30,7 +30,13 @@ pdfUpload.addEventListener('change', async (e) => {
             body: formData
         });
 
-        const data = await response.json();
+        let data;
+        try {
+            data = await response.json();
+        } catch (e) {
+            console.error("Failed to parse JSON response:", e);
+            data = { detail: `Server returned ${response.status} ${response.statusText}` };
+        }
 
         if (response.ok) {
             uploadStatus.textContent = `✓ Ready! (${data.chunks} chunks)`;

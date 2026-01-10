@@ -11,11 +11,17 @@ class RAGEngine:
         self.vector_db_path = vector_db_path
         
         # Initialize ChromaDB
+        # Initialize ChromaDB
         self.chroma_client = chromadb.PersistentClient(path=vector_db_path)
         
+        # Check for HF_TOKEN
+        self.hf_token = os.getenv("HF_TOKEN")
+        if not self.hf_token:
+            raise ValueError("HF_TOKEN environment variable is not set. Please set it in your .env file or environment.")
+
         # Use HuggingFace API for embeddings (Saves RAM)
         self.embedding_fn = embedding_functions.HuggingFaceEmbeddingFunction(
-            api_key=os.getenv("HF_TOKEN"),
+            api_key=self.hf_token,
             model_name="sentence-transformers/all-MiniLM-L6-v2"
         )
         
@@ -24,8 +30,7 @@ class RAGEngine:
             embedding_function=self.embedding_fn
         )
         
-        # Initialize HF Client
-        self.hf_token = os.getenv("HF_TOKEN")
+        # Initialize HF Client (re-using the validated token)
         self.hf_client = InferenceClient(
             model="HuggingFaceH4/zephyr-7b-beta",
             token=self.hf_token
