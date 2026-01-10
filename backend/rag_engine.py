@@ -20,62 +20,55 @@ class RAGEngine:
         if not self.hf_token:
             raise ValueError("HF_TOKEN environment variable is not set. Please set it in your .env file or environment.")
 
-        # Use Custom HuggingFace API for embeddings (Saves RAM) to enforce new URL
-        self.embedding_fn = CustomHuggingFaceEmbeddingFunction(
-            api_key=self.hf_token,
-            model_name="sentence-transformers/all-MiniLM-L6-v2"
+        # Initialize HF Client first
+        self.hf_client = InferenceClient(
+            model="sentence-transformers/all-MiniLM-L6-v2",
+            token=self.hf_token
         )
+
+        # Validate Connection immediately using the client
+        self._validate_api_connection()
+
+        # Use InferenceClient for embeddings (Wrapper)
+        self.embedding_fn = InferenceClientEmbeddingFunction(self.hf_client)
         
         self.collection = self.chroma_client.get_or_create_collection(
             name="documents",
             embedding_function=self.embedding_fn
         )
         
-        # Initialize HF Client (re-using the validated token)
-        self.hf_client = InferenceClient(
+        # Chat client (Zephyr)
+        self.chat_client = InferenceClient(
             model="HuggingFaceH4/zephyr-7b-beta",
             token=self.hf_token
         )
 
-        # Validate Connection immediately
-        self._validate_api_connection()
-
     def _validate_api_connection(self):
-        """Test the embedding API to ensure the token is valid and model is ready."""
-        # UPDATED: Use router.huggingface.co instead of deprecated api-inference
-        api_url = f"https://router.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
-        headers = {"Authorization": f"Bearer {self.hf_token}"}
+        """Test the embedding API using InferenceClient."""
         try:
-            response = requests.post(api_url, headers=headers, json={"inputs": "Hello world", "options": {"wait_for_model": True}})
-            if response.status_code != 200:
-                raise ValueError(f"Hugging Face API Verification Failed: {response.text}")
-            
-            # Additional check: ensure response is a list (vector) not an error dict
-            data = response.json()
-            if isinstance(data, dict) and "error" in data:
-                 raise ValueError(f"Hugging Face API Error: {data['error']}")
-                 
+            self.hf_client.feature_extraction("Hello world")
         except Exception as e:
-            # Re-raise ValueErrors as is, wrap others
-            if isinstance(e, ValueError):
-                raise e
-            raise ValueError(f"Connection to Hugging Face API failed: {str(e)}")
+            raise ValueError(f"Hugging Face API Verification Failed: {str(e)}")
 
-class CustomHuggingFaceEmbeddingFunction(embedding_functions.EmbeddingFunction):
-    def __init__(self, api_key: str, model_name: str):
-        self.api_url = f"https://router.huggingface.co/models/{model_name}"
-        self.headers = {"Authorization": f"Bearer {api_key}"}
-        self.session = requests.Session()
+class InferenceClientEmbeddingFunction(embedding_functions.EmbeddingFunction):
+    def __init__(self, client: InferenceClient):
+        self.client = client
 
     def __call__(self, input: chromadb.Documents) -> chromadb.Embeddings:
-        response = self.session.post(
-            self.api_url,
-            headers=self.headers,
-            json={"inputs": input, "options": {"wait_for_model": True}}
-        )
-        if response.status_code != 200:
-             raise ValueError(f"Embedding API Error: {response.text}")
-        return response.json()
+        embeddings = []
+        # InferenceClient.feature_extraction typically takes a single string.
+        # We loop to be safe and avoid payload issues.
+        for text in input:
+            try:
+                # Returns shape (384,) for this model
+                emb = self.client.feature_extraction(text)
+                # Ensure it's a list check
+                if hasattr(emb, "tolist"):
+                    emb = emb.tolist()
+                embeddings.append(emb)
+            except Exception as e:
+                 raise ValueError(f"Embedding Generation Error: {str(e)}")
+        return embeddings
 
     def process_pdf(self, file_path: str, filename: str):
         # 1. Extract Text
@@ -128,7 +121,7 @@ class CustomHuggingFaceEmbeddingFunction(embedding_functions.EmbeddingFunction):
         ]
         
         try:
-            response = self.hf_client.chat_completion(
+            response = self.chat_client.chat_completion(
                 messages=messages,
                 max_tokens=500,
                 temperature=0.1
