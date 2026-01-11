@@ -56,9 +56,9 @@ class RAGEngine:
             embedding_function=self.embedding_fn
         )
         
-        # Chat client (Mistral-7B-v0.2 - More stable)
+        # Chat client (Qwen 2.5 - High Performance & Available)
         self.chat_client = InferenceClient(
-            model="mistralai/Mistral-7B-Instruct-v0.2",
+            model="Qwen/Qwen2.5-72B-Instruct",
             token=self.hf_token
         )
 

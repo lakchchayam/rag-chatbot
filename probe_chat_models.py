@@ -7,11 +7,11 @@ load_dotenv("backend/.env")
 token = os.getenv("HF_TOKEN")
 
 models = [
-    "mistralai/Mistral-7B-Instruct-v0.3",
-    "mistralai/Mistral-7B-Instruct-v0.2",
-    "microsoft/Phi-3-mini-4k-instruct",
-    "HuggingFaceH4/zephyr-7b-beta", # Re-testing just in case
-    "google/gemma-1.1-7b-it"
+    "Qwen/Qwen2.5-72B-Instruct", # Often free
+    "Qwen/Qwen2.5-7B-Instruct",
+    "meta-llama/Meta-Llama-3-8B-Instruct",
+    "google/gemma-7b-it",
+    "microsoft/Phi-3-mini-4k-instruct"
 ]
 
 print(f"Testing Chat Models with token: {token[:5]}...\n")
