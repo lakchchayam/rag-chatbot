@@ -56,9 +56,9 @@ class RAGEngine:
             embedding_function=self.embedding_fn
         )
         
-        # Chat client (Zephyr)
+        # Chat client (Mistral-7B-v0.2 - More stable)
         self.chat_client = InferenceClient(
-            model="HuggingFaceH4/zephyr-7b-beta",
+            model="mistralai/Mistral-7B-Instruct-v0.2",
             token=self.hf_token
         )
 
