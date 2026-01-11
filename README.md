@@ -1,100 +1,100 @@
-# RAG-Based LLM Chatbot (FastAPI + Vanilla JS)
+# 🤖 DocuChat AI - Production RAG System
 
-## **Overview**
-This is a production-style, Retreival-Augmented Generation (RAG) chatbot application. It allows users to upload PDF documents and ask questions based strictly on the content of those documents. The system leverages **FastAPI** for the backend, **ChromaDB** for vector storage, and **HuggingFace Inference API** for LLM generation (Mistral-7B). The frontend is built with pure HTML/CSS/JS to demonstrate core web fundamentals without framework overhead.
+![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python)
+![FastAPI](https://img.shields.io/badge/FastAPI-0.68%2B-009688?style=for-the-badge&logo=fastapi)
+![RAG](https://img.shields.io/badge/Architecture-RAG-orange?style=for-the-badge)
+![Status](https://img.shields.io/badge/Status-Production--Ready-success?style=for-the-badge)
 
-**Live Demo URL:** [Your Render URL Here]
+**DocuChat AI** is a professional-grade Retrieval-Augmented Generation (RAG) application that allows users to chat with their PDF documents. Built for reliability and performance, it leverages **Qwen-72B** for high-intelligence reasoning and **ChromaDB** for efficient semantic search.
 
-## **Architecture**
+> **Live Demo:** [https://rag-chatbot-c7lo.onrender.com](https://rag-chatbot-c7lo.onrender.com)
 
-### **Tech Stack**
-*   **Backend:** Python 3.9+, FastAPI
-*   **Vector Database:** ChromaDB (Local/Ephemeral for demo)
-*   **LLM Service:** HuggingFace Serverless Inference API (Mistral-7B-Instruct-v0.3)
-*   **Embeddings:** sentence-transformers/all-MiniLM-L6-v2 (Local)
-*   **Frontend:** HTML5, CSS3, Vanilla JavaScript
-*   **Deployment:** Render (Backend), Netlify/Vercel (Frontend)
+---
 
-### **RAG Pipeline Flow**
-1.  **Ingestion:**
-    *   PDF is uploaded and text is extracted.
-    *   Text is split into chunks (500 words, 50 overlap).
-    *   Chunks are embedded using `all-MiniLM-L6-v2`.
-    *   Embeddings + Metadata are stored in ChromaDB.
-2.  **Retrieval:**
-    *   User query is embedded.
-    *   Top 3 most similar chunks are retrieved from ChromaDB.
-3.  **Generation:**
-    *   Context + Query are formatted into a strict prompt.
-    *   Mistral-7B generates an answer ONLY using the provided context.
+## ✨ Features
 
-## **Local Setup**
+*   **📄 PDF Ingestion Engine**: Robust parsing and chunking pipeline designed for complex documents.
+*   **🧠 Advanced RAG Architecture**: Uses `sentence-transformers/all-MiniLM-L6-v2` for dense vector embeddings.
+*   **🤖 State-of-the-Art LLM**: Powered by **Qwen 2.5 (72B)** via Hugging Face Inference API for accurate, grounded answers.
+*   **⚡ Async Backend**: High-performance **FastAPI** server handling non-blocking file operations.
+*   **🔒 Production Grade**: Includes strict environment validation, error propagation, and API connection pooling.
+*   **🌐 Modern UI**: Clean, responsive interface built with Vanilla JS for maximum speed and compatibility.
 
-### 1. Prerequisites
-*   Python 3.9+ installed.
-*   HuggingFace API Token (Free). [Get one here](https://huggingface.co/settings/tokens).
+---
 
-### 2. Backend Setup
-```bash
-cd backend
-python3 -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
-```
+## 🛠️ System Architecture
 
-Create a `.env` file in the `backend` folder:
-```env
-HF_TOKEN=your_huggingface_token_here
-```
+The application follows a standard RAG pipeline:
 
-Start the server:
-```bash
-uvicorn main:app --reload
-```
-API runs at: `http://localhost:8000`
+1.  **Ingestion**: User uploads a PDF -> Text is extracted -> Text is split into 500-token chunks.
+2.  **Indexing**: Chunks are embedded into 384-dimensional vectors and stored in **ChromaDB**.
+3.  **Retrieval**: User question is embedded -> System searches ChromaDB for top-3 relevant chunks.
+4.  **Generation**: Question + Context tokens are sent to **Qwen-72B** to generate the final answer.
 
-### 3. Frontend Setup
-Simply open `frontend/index.html` in your browser. 
-*Note: For a better experience, use a simple HTTP server:*
-```bash
-cd frontend
-python3 -m http.server 3000
-```
-Then visit `http://localhost:3000`.
+---
 
-## **Deployment Steps (Free Method)**
+## 🚀 Getting Started
 
-We will deploy everything (Frontend + Backend) as **one service** on **Render**. This is the easiest and free method.
+### Prerequisites
 
-### **1. Push to GitHub**
-1.  Create a new repository on GitHub.
-2.  Run these commands in your terminal (inside `rag-chatbot-production`):
+*   Python 3.9+
+*   Hugging Face API Token (`HF_TOKEN`)
+
+### Installation
+
+1.  **Clone the repository**
     ```bash
-    git init
-    git add .
-    git commit -m "Initial commit"
-    git branch -M main
-    git remote add origin https://github.com/YOUR_USERNAME/YOUR_REPO_NAME.git
-    git push -u origin main
+    git clone https://github.com/lakchchayam/rag-chatbot.git
+    cd rag-chatbot
     ```
 
-### **2. Deploy on Render**
-1.  Go to [dashboard.render.com](https://dashboard.render.com) and login.
-2.  Click **New +** -> **Web Service**.
-3.  Connect your GitHub repository.
-4.  **Settings**:
-    *   **Root Directory:** `rag-chatbot-production/backend` (Important!)
-    *   **Build Command:** `pip install -r requirements.txt`
-    *   **Start Command:** `uvicorn main:app --host 0.0.0.0 --port $PORT`
-    *   **Instance Type:** Free
-5.  **Environment Variables** (Scroll down):
-    *   Key: `HF_TOKEN`
-    *   Value: `hf_...` (Your HuggingFace Token)
-6.  Click **Deploy Web Service**.
+2.  **Install Dependencies**
+    ```bash
+    pip install -r backend/requirements.txt
+    ```
 
-Once live, visit your Render URL (e.g., `https://my-chatbot.onrender.com`) and it will work!
+3.  **Environment Setup**
+    Create a `.env` file in the `backend/` directory:
+    ```env
+    HF_TOKEN=your_huggingface_token_here
+    ```
 
-## **Tradeoffs & Design Decisions**
-*   **ChromaDB Local**: Chosen for simplicity in this portfolio project. In a scaled production app, we would use a managed instance (Pinecone/Weaviate) to handle data persistence across container restarts.
-*   **Vanilla JS**: strict requirement to minimal dependencies. React/Next.js would be better for complex state management, but Vanilla JS reduces build complexity for this scope.
-*   **Chunking Strategy**: Fixed-size sliding window is used. For better accuracy, semantic chunking or recursive splitting based on document structure (headers) could be implemented.
+4.  **Run Locally**
+    ```bash
+    cd backend
+    uvicorn main:app --reload
+    ```
+    Visit `http://localhost:8000` to use the app.
+
+---
+
+## 📂 Project Structure
+
+```
+rag-chatbot/
+├── backend/
+│   ├── main.py          # FastAPI Application Entrypoint
+│   ├── rag_engine.py    # Core RAG Logic (Indexing, Retrieval, Generation)
+│   └── requirements.txt # Python Dependencies
+├── frontend/
+│   ├── index.html       # Client User Interface
+│   └── app.js           # Frontend Logic & API Integration
+├── scripts/             # Utility & Verification Scripts
+└── README.md            # Documentation
+```
+
+---
+
+## 🤝 Career & Learning
+
+This project demonstrates core competencies in **AI Application Engineering**, including:
+*   Vector Database Management (ChromaDB)
+*   LLM Integration (Prompt Engineering & API handling)
+*   Systems Design (Data Pipelines)
+*   Full Stack Development (FastAPI + JS)
+
+---
+
+## 📜 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
