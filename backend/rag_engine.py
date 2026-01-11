@@ -7,11 +7,30 @@ import chromadb
 from chromadb.utils import embedding_functions
 from huggingface_hub import InferenceClient
 
+class InferenceClientEmbeddingFunction(embedding_functions.EmbeddingFunction):
+    def __init__(self, client: InferenceClient):
+        self.client = client
+
+    def __call__(self, input: chromadb.Documents) -> chromadb.Embeddings:
+        embeddings = []
+        # InferenceClient.feature_extraction typically takes a single string.
+        # We loop to be safe and avoid payload issues.
+        for text in input:
+            try:
+                # Returns shape (384,) for this model
+                emb = self.client.feature_extraction(text)
+                # Ensure it's a list check
+                if hasattr(emb, "tolist"):
+                    emb = emb.tolist()
+                embeddings.append(emb)
+            except Exception as e:
+                 raise ValueError(f"Embedding Generation Error: {str(e)}")
+        return embeddings
+
 class RAGEngine:
     def __init__(self, vector_db_path="./chroma_db"):
         self.vector_db_path = vector_db_path
         
-        # Initialize ChromaDB
         # Initialize ChromaDB
         self.chroma_client = chromadb.PersistentClient(path=vector_db_path)
         
@@ -50,27 +69,6 @@ class RAGEngine:
         except Exception as e:
             raise ValueError(f"Hugging Face API Verification Failed: {str(e)}")
 
-class InferenceClientEmbeddingFunction(embedding_functions.EmbeddingFunction):
-    def __init__(self, client: InferenceClient):
-        self.client = client
-
-    def __call__(self, input: chromadb.Documents) -> chromadb.Embeddings:
-        embeddings = []
-        # InferenceClient.feature_extraction typically takes a single string.
-        # We loop to be safe and avoid payload issues.
-        for text in input:
-            try:
-                # Returns shape (384,) for this model
-                emb = self.client.feature_extraction(text)
-                # Ensure it's a list check
-                if hasattr(emb, "tolist"):
-                    emb = emb.tolist()
-                embeddings.append(emb)
-            except Exception as e:
-                 raise ValueError(f"Embedding Generation Error: {str(e)}")
-        return embeddings
-
-    # This method belongs to RAGEngine, not the embedding function
     def process_pdf(self, file_path: str, filename: str):
         # 1. Extract Text
         reader = PdfReader(file_path)
