@@ -70,6 +70,7 @@ class InferenceClientEmbeddingFunction(embedding_functions.EmbeddingFunction):
                  raise ValueError(f"Embedding Generation Error: {str(e)}")
         return embeddings
 
+    # This method belongs to RAGEngine, not the embedding function
     def process_pdf(self, file_path: str, filename: str):
         # 1. Extract Text
         reader = PdfReader(file_path)
